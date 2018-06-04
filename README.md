@@ -11,8 +11,5 @@ ARCHITECTURE=inception_v3
 `
 
 ## Score the model
-`python -m hotdog.label_image   \
-   --graph=tf_files/retrained_graph.pb \
-   --input_height=299 --input_width=299  \
-   --image=images/hot_dog/hotdog-1.jpg
+`python -m hotdog.label_image --graph=tf_files/retrained_graph.pb --input_height=299 --input_width=299 --image=images/hot_dog/hotdog-1.jpg
 `
