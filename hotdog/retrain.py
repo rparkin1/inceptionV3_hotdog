@@ -16,30 +16,17 @@ Here's an example, which assumes you have a folder containing class-named
 subfolders, each full of images for each label. The example folder flower_photos
 should have a structure like this:
 
-~/flower_photos/daisy/photo1.jpg
-~/flower_photos/daisy/photo2.jpg
+~/images/hot_dog/hot_dog-1.jpg
+~/images/hot_dog/hot_dog-2.jpg
 ...
-~/flower_photos/rose/anotherphoto77.jpg
-...
-~/flower_photos/sunflower/somepicture.jpg
+~/images/not_hot_dog/not_hot_dog-1.jpg
+
 
 The subfolder names are important, since they define what label is applied to
-each image, but the filenames themselves don't matter. Once your images are
-prepared, you can run the training with a command like this:
-
-
-```bash
-bazel build tensorflow/examples/image_retraining:retrain && \
-bazel-bin/tensorflow/examples/image_retraining/retrain \
-    --image_dir ~/flower_photos
-```
-
-Or, if you have a pip installation of tensorflow, `retrain.py` can be run
-without bazel:
-
+each image, but the filenames themselves don't matter. 
 ```bash
 python tensorflow/examples/image_retraining/retrain.py \
-    --image_dir ~/flower_photos
+    --image_dir ~/images
 ```
 
 You can replace the image_dir argument with any folder containing subfolders of
@@ -57,7 +44,7 @@ Mobilenet model. For example:
 
 ```bash
 python tensorflow/examples/image_retraining/retrain.py \
-    --image_dir ~/flower_photos --architecture mobilenet_1.0_224
+    --image_dir ~/images --architecture mobilenet_1.0_224
 ```
 
 There are 32 different Mobilenet models to choose from, with a variety of file
@@ -159,11 +146,6 @@ def create_image_lists(image_dir, testing_percentage, validation_percentage):
     validation_images = []
     for file_name in file_list:
       base_name = os.path.basename(file_name)
-      # We want to ignore anything after '_nohash_' in the file name when
-      # deciding which set to put an image in, the data set creator has a way of
-      # grouping photos that are close variations of each other. For example
-      # this is used in the plant disease data set to group multiple pictures of
-      # the same leaf.
       hash_name = re.sub(r'_nohash_.*$', '', file_name)
       # This looks a bit magical, but we need to decide whether this file should
       # go into the training, testing, or validation sets, and we want to keep
@@ -427,13 +409,6 @@ def cache_bottlenecks(sess, image_lists, image_dir, bottleneck_dir,
                       jpeg_data_tensor, decoded_image_tensor,
                       resized_input_tensor, bottleneck_tensor, architecture):
   """Ensures all the training, testing, and validation bottlenecks are cached.
-
-  Because we're likely to read the same image multiple times (if there are no
-  distortions applied during training) it can speed things up a lot if we
-  calculate the bottleneck layer values once for each image during
-  preprocessing, and then just read those cached values repeatedly during
-  training. Here we go through all the images we've found, calculate those
-  values, and save them off.
 
   Args:
     sess: The current active TensorFlow Session.
